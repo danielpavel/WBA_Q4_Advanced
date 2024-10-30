@@ -1,4 +1,4 @@
-use instructions::VaultInstructions;
+use instructions::{deposit, withdraw, VaultInstructions};
 use solana_program::{
     account_info::AccountInfo,
     entrypoint::{entrypoint, ProgramResult},
@@ -21,14 +21,20 @@ fn process_instruction(
         return Err(ProgramError::IncorrectProgramId);
     }
 
-    // Figure out which instruction we're calling
     let (discriminator, data) = data
         .split_first()
         .ok_or(ProgramError::InvalidInstructionData)?;
 
+    // The incomming data is just the `amount` value so no need of complex deserialization
+
+    assert_eq!(data.len(), 8); // u64
+    let amount = u64::from_le_bytes([
+        data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7],
+    ]);
+
     match VaultInstructions::try_from(discriminator)? {
-        VaultInstructions::Deposit => todo!(),
-        VaultInstructions::Withdraw => todo!(),
+        VaultInstructions::Deposit => deposit::process(accounts, amount)?,
+        VaultInstructions::Withdraw => withdraw::process(accounts, amount)?,
     };
 
     Ok(())

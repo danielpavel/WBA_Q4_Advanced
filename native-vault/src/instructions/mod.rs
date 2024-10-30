@@ -1,3 +1,6 @@
+pub mod deposit;
+pub mod withdraw;
+
 use solana_program::program_error::ProgramError;
 
 pub enum VaultInstructions {
